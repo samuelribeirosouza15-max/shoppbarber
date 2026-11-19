@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Barbearia | ShoppBarber</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--fundo-escolhido, #090a0f);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background 0.25s ease;
+        }
+
+        .card {
+            background: rgba(24, 31, 46, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 16px;
+            padding: 28px;
+            width: 100%;
+            max-width: 470px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--cor-escolhida, #00bfff);
+            margin-bottom: 6px;
+            transition: color 0.25s;
+        }
+
+        .subtitulo {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.92rem;
+            margin-bottom: 20px;
+        }
+
+        .grupo {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+
+        .dica-cor {
+            font-size: 0.76rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #475569;
+            background: rgba(9, 10, 15, 0.75);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--cor-escolhida, #00bfff);
+        }
+
+        .preview-link {
+            font-size: 0.8rem;
+            color: var(--cor-escolhida, #00bfff);
+            margin-top: 5px;
+        }
+
+        .cores-opcoes {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .bolinha-cor {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            transition: 0.2s;
+        }
+
+        .bolinha-cor.ativa {
+            border-color: #fff;
+            transform: scale(1.14);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        input[type="color"] {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        /* Mini prévia ao vivo de como o site do cliente vai ficar */
+        .mini-preview {
+            background: var(--fundo-escolhido, #090a0f);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.25s ease;
+        }
+
+        .mini-preview-titulo {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--cor-escolhida, #00bfff);
+        }
+
+        .mini-preview-sub {
+            font-size: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        .mini-preview-btn {
+            background: var(--cor-escolhida, #00bfff);
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--cor-escolhida, #00bfff);
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        .msg {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            text-align: center;
+        }
+
+        .erro {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+
+        .sucesso {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #86efac;
+        }
+
+        .voltar {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .voltar:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="logo" id="logoTopo">💈 ShoppBarber</div>
+        <p class="subtitulo">Crie o sistema exclusivo da sua barbearia em segundos</p>
+
+        <form id="formBarbearia">
+            <div class="grupo">
+                <label>Nome da Barbearia</label>
+                <input type="text" id="nome" placeholder="Ex: Barbearia do Zé" required
+                    oninput="atualizarPreviewNome()">
+            </div>
+
+            <div class="grupo">
+                <label>Link exclusivo da loja (sem espaços)</label>
+                <input type="text" id="slug" placeholder="Ex: ze" required oninput="atualizarPreview()">
+                <div class="preview-link">Seu link será: <strong id="previewUrl">shoppbarber.com/sua-loja</strong></div>
+            </div>
+
+            <div class="grupo">
+                <label>WhatsApp do Dono (com DDD)</label>
+                <input type="text" id="whatsapp" placeholder="Ex: 62999999999" required>
+            </div>
+
+            <div class="grupo">
+                <label>1. Cor dos Botões e Títulos</label>
+                <span class="dica-cor">Muda a cor do botão "Agendar", nome da barbearia e destaques</span>
+                <div class="cores-opcoes" id="grupoCorTema">
+                    <div class="bolinha-cor ativa" style="background:#00bfff;" onclick="selecionarCor('#00bfff', this)"
+                        title="Azul Neon"></div>
+                    <div class="bolinha-cor" style="background:#f59e0b;" onclick="selecionarCor('#f59e0b', this)"
+                        title="Dourado"></div>
+                    <div class="bolinha-cor" style="background:#10b981;" onclick="selecionarCor('#10b981', this)"
+                        title="Verde Esmeralda"></div>
+                    <div class="bolinha-cor" style="background:#ef4444;" onclick="selecionarCor('#ef4444', this)"
+                        title="Vermelho"></div>
+                    <div class="bolinha-cor" style="background:#a855f7;" onclick="selecionarCor('#a855f7', this)"
+                        title="Roxo"></div>
+                    <input type="color" id="corCustom" value="#00bfff" oninput="selecionarCor(this.value, null)"
+                        title="Escolher outra cor de botão">
+                </div>
+                <input type="hidden" id="cor_tema" value="#00bfff">
+            </div>
+
+            <div class="grupo">
+                <label>2. Cor do Fundo do Site</label>
+                <span class="dica-cor">Muda a cor de fundo da tela inteira da barbearia</span>
+                <div class="cores-opcoes" id="grupoCorFundo">
+                    <div class="bolinha-cor ativa" style="background:#090a0f;"
+                        onclick="selecionarFundo('#090a0f', this)" title="Preto Profundo"></div>
+                    <div class="bolinha-cor" style="background:#0f172a;" onclick="selecionarFundo('#0f172a', this)"
+                        title="Azul Noturno"></div>
+                    <div class="bolinha-cor" style="background:#18181b;" onclick="selecionarFundo('#18181b', this)"
+                        title="Cinza Grafite"></div>
+                    <div class="bolinha-cor" style="background:#052e16;" onclick="selecionarFundo('#052e16', this)"
+                        title="Verde Escuro"></div>
+                    <div class="bolinha-cor" style="background:#2d0a10;" onclick="selecionarFundo('#2d0a10', this)"
+                        title="Vinho Escuro"></div>
+                    <input type="color" id="fundoCustom" value="#090a0f" oninput="selecionarFundo(this.value, null)"
+                        title="Escolher outra cor de fundo">
+                </div>
+                <input type="hidden" id="cor_fundo" value="#090a0f">
+            </div>
+
+            <!-- Prévia ao vivo de como o site vai ficar -->
+            <div class="mini-preview">
+                <div>
+                    <div class="mini-preview-titulo" id="previewNomeLoja">👑 Sua Barbearia</div>
+                    <div class="mini-preview-sub">Prévia do fundo e botão do site</div>
+                </div>
+                <div class="mini-preview-btn">Agendar</div>
+            </div>
+
+            <div class="grupo">
+                <label>Senha do Painel Admin</label>
+                <input type="password" id="senha" placeholder="Crie uma senha de acesso" required>
+            </div>
+
+            <button type="submit" id="btnCriar">Criar Minha Barbearia 🚀</button>
+        </form>
+
+        <div id="mensagem" class="msg"></div>
+        <a href="/super_admin" class="voltar">← Voltar para o Gestor ShoppBarber</a>
+    </div>
+
+    <script>
+        function selecionarCor(cor, elemento) {
+            document.getElementById('cor_tema').value = cor;
+            document.getElementById('corCustom').value = cor;
+            document.documentElement.style.setProperty('--cor-escolhida', cor);
+
+            document.querySelectorAll('#grupoCorTema .bolinha-cor').forEach(b => b.classList.remove('ativa'));
+            if (elemento) elemento.classList.add('ativa');
+        }
+
+        function selecionarFundo(cor, elemento) {
+            document.getElementById('cor_fundo').value = cor;
+            document.getElementById('fundoCustom').value = cor;
+            document.documentElement.style.setProperty('--fundo-escolhido', cor);
+            document.body.style.background = cor;
+
+            document.querySelectorAll('#grupoCorFundo .bolinha-cor').forEach(b => b.classList.remove('ativa'));
+            if (elemento) elemento.classList.add('ativa');
+        }
+
+        function atualizarPreviewNome() {
+            const nome = document.getElementById('nome').value.trim();
+            document.getElementById('previewNomeLoja').innerText = '👑 ' + (nome || 'Sua Barbearia');
+        }
+
+        function atualizarPreview() {
+            const slugInput = document.getElementById('slug');
+            const limpo = slugInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            slugInput.value = limpo;
+            document.getElementById('previewUrl').innerText = window.location.host + '/' + (limpo || 'sua-loja');
+        }
+
+        document.getElementById('formBarbearia').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('mensagem');
+            msg.style.display = 'none';
+
+            const dados = {
+                nome: document.getElementById('nome').value,
+                slug: document.getElementById('slug').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                cor_tema: document.getElementById('cor_tema').value,
+                cor_fundo: document.getElementById('cor_fundo').value,
+                senha: document.getElementById('senha').value
+            };
+
+            const resp = await fetch('/api/cadastrar_barbearia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            const res = await resp.json();
+            msg.style.display = 'block';
+
+            if (resp.ok) {
+                msg.className = 'msg sucesso';
+                msg.innerText = res.mensagem + ' Redirecionando para sua nova loja...';
+                setTimeout(() => {
+                    window.location.href = '/' + res.slug;
+                }, 1500);
+            } else {
+                msg.className = 'msg erro';
+                msg.innerText = res.erro || 'Erro ao cadastrar.';
+            }
+        });
+    </script>
+</body>
+
+</html>

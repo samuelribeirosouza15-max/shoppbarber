@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ barbearia.nome if barbearia else 'King Barbearia' }} - Serviços</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #090a0f 0%, #161a25 100%);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .comodidades {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .comodidade-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .comodidade-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            outline: none;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .ordenacao {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            align-items: center;
+            color: #aaa;
+        }
+
+        .btn-ordem {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Poppins', sans-serif;
+            transition: 0.3s;
+        }
+
+        .btn-ordem.active {
+            background: linear-gradient(135deg, #0088cc, #00bfff);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        }
+
+        .lista-servicos {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card-servico {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .card-servico:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .servico-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .icone-poste {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #0d2a4d, #004488);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .servico-detalhes h3 {
+            margin: 0 0 5px 0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .servico-detalhes .preco {
+            color: #2ecc71;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0 0 5px 0;
+        }
+
+        .servico-detalhes .duracao {
+            color: #aaa;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-agendar {
+            background: linear-gradient(135deg, #0088cc, #00bfff);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-agendar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.5);
+        }
+
+        .menu-inferior {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(20, 20, 20, 0.9);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888;
+            font-size: 11px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .menu-item.ativo {
+            color: #fff;
+        }
+
+        .menu-item span {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cor dinâmica da barbearia */
+        :root {
+            --cor: {
+                    {
+                    barbearia.cor_tema if (barbearia and barbearia.cor_tema) else '#00bfff'
+                }
+            }
+
+            ;
+        }
+
+        .btn-agendar,
+        .btn-ordem.active {
+            background: var(--cor) !important;
+            box-shadow: none !important;
+        }
+
+        .header h2 {
+            color: var(--cor);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h2 id="logoSegredo">👑 {{ barbearia.nome if barbearia else 'King Barbearia' }}</h2>
+        {% if nome_cliente %}
+        <a href="/logout"
+            style="color: var(--cor); text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+            👤 {{ nome_cliente }} <span
+                style="font-size: 10px; color: #888; margin-left: 5px; font-weight: 300;">(Sair)</span>
+        </a>
+        {% else %}
+        <a href="/login" style="color: #fff; text-decoration: none; font-size: 14px;">👤 Perfil</a>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 600;">Comodidades</h3>
+        <div class="comodidades" id="listaComodidades"></div>
+
+        <h3 style="font-size: 16px; margin-bottom: 15px; font-weight: 600;">Serviços</h3>
+
+        <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" id="pesquisaInput" placeholder="Pesquisar serviço..." onkeyup="filtrarServicos()">
+        </div>
+
+        <div class="ordenacao">
+            <span>Ordenar por</span>
+            <button class="btn-ordem active" onclick="ordenarServicos('nome', this)">📝 Nome</button>
+            <button class="btn-ordem" onclick="ordenarServicos('preco', this)">💰 Valor</button>
+        </div>
+
+        <div class="lista-servicos" id="listaServicos"></div>
+    </div>
+
+    <div class="menu-inferior">
+        <a href="/" class="menu-item ativo"><span>🏠</span> Início</a>
+        <a href="#pesquisaInput" onclick="document.getElementById('pesquisaInput').focus()"
+            class="menu-item"><span>🔍</span> Buscar</a>
+        <a href="/tela_agendamento" class="menu-item"><span>📅</span> Agendar</a>
+        <a href="/login" class="menu-item"><span>👤</span> Perfil</a>
+    </div>
+
+    <script>
+        let todosServicos = [];
+        const posteSVG = `
+            <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="4" width="14" height="32" fill="#222" rx="2"/>
+                <rect x="10" y="6" width="12" height="28" fill="white"/>
+                <polygon points="10,6 22,14 22,6" fill="#e74c3c"/>
+                <polygon points="10,14 22,22 22,14" fill="#0088cc"/>
+                <polygon points="10,22 22,30 22,22" fill="#e74c3c"/>
+                <polygon points="10,30 22,34 22,30" fill="#0088cc"/>
+                <rect x="6" y="0" width="20" height="6" fill="#222" rx="2"/>
+                <rect x="6" y="34" width="20" height="6" fill="#222" rx="2"/>
+            </svg>
+        `;
+
+        async function carregarServicos() {
+            try {
+                const res = await fetch('/api/servicos');
+                todosServicos = await res.json();
+                renderizarServicos(todosServicos);
+            } catch (erro) { console.error(erro); }
+        }
+
+        async function carregarComodidades() {
+            try {
+                const res = await fetch('/api/comodidades');
+                if (!res.ok) return;
+                const comodidades = await res.json();
+                const container = document.getElementById('listaComodidades');
+                container.innerHTML = '';
+                comodidades.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'comodidade-item';
+                    div.innerHTML = c.icone;
+                    div.onclick = () => alert(`✨ ${c.nome}\n\n${c.descricao}`);
+                    container.appendChild(div);
+                });
+            } catch (e) { console.log("Comodidades não carregadas."); }
+        }
+
+        function renderizarServicos(lista) {
+            const container = document.getElementById('listaServicos');
+            if (lista.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#888;">Nenhum serviço cadastrado.</p>';
+                return;
+            }
+            let html = '';
+            lista.forEach(s => {
+                html += `
+                    <div class="card-servico">
+                        <div class="servico-info">
+                            <div class="icone-poste">${posteSVG}</div>
+                            <div class="servico-detalhes">
+                                <h3>${s.nome}</h3>
+                                <div class="preco">R$ ${s.preco.toFixed(2).replace('.', ',')}</div>
+                                <div class="duracao">⏱ ${s.duracao} min</div>
+                            </div>
+                        </div>
+                        <a href="/tela_agendamento?servico=${encodeURIComponent(s.nome)}" class="btn-agendar">Agendar</a>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function filtrarServicos() {
+            const termo = document.getElementById('pesquisaInput').value.toLowerCase();
+            renderizarServicos(todosServicos.filter(s => s.nome.toLowerCase().includes(termo)));
+        }
+
+        function ordenarServicos(tipo, elemento) {
+            document.querySelectorAll('.btn-ordem').forEach(b => b.classList.remove('active'));
+            elemento.classList.add('active');
+            if (tipo === 'nome') todosServicos.sort((a, b) => a.nome.localeCompare(b.nome));
+            else todosServicos.sort((a, b) => a.preco - b.preco);
+            renderizarServicos(todosServicos);
+        }
+
+        let cliques = 0;
+        let tempoClique;
+        document.getElementById('logoSegredo').addEventListener('click', () => {
+            cliques++;
+            clearTimeout(tempoClique);
+            tempoClique = setTimeout(() => { cliques = 0; }, 1000);
+            if (cliques === 5) {
+                cliques = 0;
+                window.location.href = '/login_admin';
+            }
+        });
+
+        carregarServicos();
+        carregarComodidades();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Horário - {{ barbearia.nome if barbearia else 'King Barbearia' }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #090a0f 0%, #161a25 100%);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 550px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .step-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 18px;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step-badge {
+            background: linear-gradient(135deg, #0088cc, #00bfff);
+            color: #fff;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .servicos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .servico-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .servico-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .servico-item.selected {
+            background: rgba(0, 136, 204, 0.2);
+            border-color: #00bfff;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
+        }
+
+        .servico-item h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .servico-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .servico-meta span.preco {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .professionals-list {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .prof-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 95px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .prof-card.selected {
+            background: rgba(0, 136, 204, 0.2);
+            border-color: #00bfff;
+        }
+
+        .prof-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .prof-card.selected .prof-img {
+            border-color: #00bfff;
+        }
+
+        .prof-name {
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .prof-esp {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .calendario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .calendario-header h3 {
+            margin: 0;
+            font-size: 15px;
+            color: #00bfff;
+            text-transform: capitalize;
+        }
+
+        .btn-mes {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .dias-semana {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .dias-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .dia-celula {
+            padding: 9px 0;
+            text-align: center;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .dia-celula:hover:not(.desativado) {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .dia-celula.active {
+            background: linear-gradient(135deg, #0088cc, #00bfff);
+            font-weight: 600;
+        }
+
+        .dia-celula.desativado {
+            background: transparent;
+            color: #444;
+            cursor: not-allowed;
+        }
+
+        .turno-titulo {
+            font-size: 12px;
+            color: #aaa;
+            margin: 14px 0 8px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .horarios-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .btn-horario {
+            background: rgba(255, 255, 255, 0.06);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-horario:hover {
+            border-color: #00bfff;
+            background: rgba(0, 136, 204, 0.15);
+        }
+
+        .btn-horario.selected {
+            background: linear-gradient(135deg, #0088cc, #00bfff);
+            border-color: transparent;
+            transform: scale(1.03);
+        }
+
+        .sem-horario {
+            grid-column: 1 / -1;
+            font-size: 12px;
+            color: #666;
+            padding: 6px 0;
+        }
+
+        .barra-resumo {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(18, 22, 31, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .resumo-info {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .resumo-info strong {
+            color: #fff;
+            font-size: 14px;
+            display: block;
+        }
+
+        .btn-confirmar {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            transition: 0.2s;
+        }
+
+        .btn-confirmar:disabled {
+            background: #333;
+            color: #777;
+            cursor: not-allowed;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #1a1f2c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-wa {
+            display: block;
+            background: #25D366;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        /* Cor dinâmica da barbearia */
+        :root {
+            --cor: {
+                    {
+                    barbearia.cor_tema if (barbearia and barbearia.cor_tema) else '#00bfff'
+                }
+            }
+
+            ;
+        }
+
+        .step-badge,
+        .dia-celula.active,
+        .btn-horario.selected {
+            background: var(--cor) !important;
+        }
+
+        .servico-item.selected,
+        .prof-card.selected,
+        .btn-horario:hover {
+            border-color: var(--cor) !important;
+        }
+
+        .calendario-header h3,
+        .header h2 {
+            color: var(--cor) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h2>👑 {{ barbearia.nome if barbearia else 'King Barbearia' }}</h2>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            {% if nome_cliente %}
+            <span style="color: var(--cor); font-size: 13px; font-weight: 600;">Olá, {{ nome_cliente }}</span>
+            {% endif %}
+            <a href="/" style="color: #aaa; text-decoration: none; font-size: 13px;">Voltar</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="step-card">
+            <div class="step-header">
+                <div class="step-badge">1</div>
+                <h3 class="step-title">Escolha o Serviço</h3>
+            </div>
+            <div class="servicos-grid" id="gridServicos"></div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <div class="step-badge">2</div>
+                <h3 class="step-title">Escolha o Barbeiro</h3>
+            </div>
+            <div class="professionals-list" id="listaProfissionais"></div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <div class="step-badge">3</div>
+                <h3 class="step-title">Escolha o Dia</h3>
+            </div>
+            <div class="calendario-header">
+                <button class="btn-mes" onclick="mudarMes(-1)">←</button>
+                <h3 id="tituloMes"></h3>
+                <button class="btn-mes" onclick="mudarMes(1)">→</button>
+            </div>
+            <div class="dias-semana">
+                <div>Dom</div>
+                <div>Seg</div>
+                <div>Ter</div>
+                <div>Qua</div>
+                <div>Qui</div>
+                <div>Sex</div>
+                <div>Sáb</div>
+            </div>
+            <div class="dias-grid" id="diasGrid"></div>
+        </div>
+
+        <div class="step-card" id="cardHorarios">
+            <div class="step-header">
+                <div class="step-badge">4</div>
+                <h3 class="step-title">Horários Livres</h3>
+            </div>
+            <div id="avisoHorarios" style="color: #888; font-size: 13px; text-align: center; padding: 15px 0;">
+                Selecione o serviço, o barbeiro e o dia acima para ver os horários livres.
+            </div>
+            <div id="areaTurnos" style="display: none;">
+                <div class="turno-titulo">☀️ Manhã</div>
+                <div class="horarios-grid" id="gridManha"></div>
+
+                <div class="turno-titulo">🌤️ Tarde</div>
+                <div class="horarios-grid" id="gridTarde"></div>
+
+                <div class="turno-titulo">🌙 Noite</div>
+                <div class="horarios-grid" id="gridNoite"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="barra-resumo">
+        <div class="resumo-info" id="resumoTexto">
+            <span>Nenhum horário selecionado</span>
+            <strong>Selecione os passos acima</strong>
+        </div>
+        <button class="btn-confirmar" id="btnConfirmar" onclick="confirmarAgendamento()" disabled>Confirmar</button>
+    </div>
+
+    <div class="modal-overlay" id="modalSucesso">
+        <div class="modal-box">
+            <div style="font-size: 45px; margin-bottom: 10px;">✅</div>
+            <h3 style="margin: 0 0 10px 0;">Horário Reservado!</h3>
+            <p id="modalDetalhes" style="color: #aaa; font-size: 13px; line-height: 1.5;"></p>
+            <a id="btnLinkWa" href="#" target="_blank" class="btn-wa">📲 Confirmar no WhatsApp</a>
+            <button onclick="window.location.href='/'"
+                style="margin-top: 12px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 13px;">Voltar
+                ao Início</button>
+        </div>
+    </div>
+
+    <script>
+        let servicoSelecionado = null;
+        let profissionalSelecionado = "";
+        let dataSelecionadaReal = "";
+        let horaSelecionada = "";
+
+        let dataAtualCalendario = new Date();
+        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        async function carregarServicos() {
+            const res = await fetch('/api/servicos');
+            const servicos = await res.json();
+            const grid = document.getElementById('gridServicos');
+            grid.innerHTML = '';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const servicoUrl = urlParams.get('servico');
+
+            servicos.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'servico-item';
+                card.innerHTML = `
+                    <h4>${s.nome}</h4>
+                    <div class="servico-meta">
+                        <span class="preco">R$ ${s.preco.toFixed(2).replace('.', ',')}</span>
+                        <span>⏱ ${s.duracao} min</span>
+                    </div>
+                `;
+                card.onclick = () => selecionarServico(s, card);
+                grid.appendChild(card);
+
+                if (servicoUrl && s.nome === servicoUrl) {
+                    selecionarServico(s, card);
+                }
+            });
+        }
+
+        function selecionarServico(servico, elemento) {
+            document.querySelectorAll('.servico-item').forEach(el => el.classList.remove('selected'));
+            elemento.classList.add('selected');
+            servicoSelecionado = servico;
+            atualizarAgenda();
+        }
+
+        async function carregarBarbeiros() {
+            const res = await fetch('/api/profissionais');
+            const profissionais = await res.json();
+            const lista = document.getElementById('listaProfissionais');
+            lista.innerHTML = '';
+
+            profissionais.forEach(p => {
+                const isDisponivel = p.status === 'Disponivel';
+                const card = document.createElement('div');
+                card.className = 'prof-card';
+                const fotoHTML = p.foto ? `<img src="${p.foto}" style="width:100%; height:100%; object-fit:cover;">` : `👨🏽‍🦱`;
+
+                if (isDisponivel) {
+                    card.onclick = () => {
+                        document.querySelectorAll('.prof-card').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        profissionalSelecionado = p.nome;
+                        atualizarAgenda();
+                    };
+                    card.innerHTML = `
+                        <div class="prof-img">${fotoHTML}</div>
+                        <div class="prof-name">${p.nome}</div>
+                        <div class="prof-esp">${p.especialidade}</div>
+                    `;
+                } else {
+                    card.style.opacity = '0.4';
+                    card.style.cursor = 'not-allowed';
+                    card.innerHTML = `
+                        <div class="prof-img" style="filter: grayscale(100%);">${fotoHTML}</div>
+                        <div class="prof-name">${p.nome}</div>
+                        <div class="prof-esp" style="color:#e74c3c;">Indisponível</div>
+                    `;
+                }
+                lista.appendChild(card);
+            });
+        }
+
+        function renderizarCalendario() {
+            const grid = document.getElementById('diasGrid');
+            grid.innerHTML = '';
+            const ano = dataAtualCalendario.getFullYear();
+            const mes = dataAtualCalendario.getMonth();
+
+            document.getElementById('tituloMes').innerText = `${meses[mes]} ${ano}`;
+            const primeiroDia = new Date(ano, mes, 1).getDay();
+            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+
+            for (let i = 0; i < primeiroDia; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for (let i = 1; i <= diasNoMes; i++) {
+                const dataLoop = new Date(ano, mes, i);
+                const celula = document.createElement('div');
+                celula.className = 'dia-celula';
+                celula.innerText = i;
+
+                const stringData = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+                if (dataLoop < hoje) {
+                    celula.classList.add('desativado');
+                } else {
+                    if (stringData === dataSelecionadaReal || (dataLoop.getTime() === hoje.getTime() && dataSelecionadaReal === "")) {
+                        celula.classList.add('active');
+                        dataSelecionadaReal = stringData;
+                    }
+                    celula.onclick = () => {
+                        document.querySelectorAll('.dia-celula').forEach(c => c.classList.remove('active'));
+                        celula.classList.add('active');
+                        dataSelecionadaReal = stringData;
+                        atualizarAgenda();
+                    };
+                }
+                grid.appendChild(celula);
+            }
+        }
+
+        function mudarMes(direcao) {
+            dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() + direcao);
+            renderizarCalendario();
+        }
+
+        function minParaHora(min) {
+            return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+        }
+
+        async function atualizarAgenda() {
+            horaSelecionada = "";
+            atualizarResumo();
+
+            if (!servicoSelecionado || !profissionalSelecionado || !dataSelecionadaReal) return;
+
+            document.getElementById('avisoHorarios').style.display = 'none';
+            document.getElementById('areaTurnos').style.display = 'block';
+
+            const res = await fetch(`/api/horarios_ocupados?profissional=${encodeURIComponent(profissionalSelecionado)}&data=${dataSelecionadaReal}`);
+            const intervalosOcupados = await res.json();
+
+            const gridManha = document.getElementById('gridManha');
+            const gridTarde = document.getElementById('gridTarde');
+            const gridNoite = document.getElementById('gridNoite');
+            gridManha.innerHTML = ''; gridTarde.innerHTML = ''; gridNoite.innerHTML = '';
+
+            const agora = new Date();
+            const hojeStr = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+            const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+
+            const duracao = servicoSelecionado.duracao;
+            const inicioExpediente = 8 * 60;
+            const fimExpediente = 20 * 60;
+
+            let cursor = inicioExpediente;
+            let qtdManha = 0, qtdTarde = 0, qtdNoite = 0;
+
+            while (cursor + duracao <= fimExpediente) {
+                const fimProposto = cursor + duracao;
+                const conflito = intervalosOcupados.find(ag => cursor < ag.fim && fimProposto > ag.inicio);
+
+                if (conflito) {
+                    cursor = conflito.fim;
+                    continue;
+                }
+
+                if (dataSelecionadaReal === hojeStr && cursor <= minutosAgora) {
+                    cursor += 5;
+                    continue;
+                }
+
+                const hrStr = minParaHora(cursor);
+                const btn = document.createElement('div');
+                btn.className = 'btn-horario';
+                btn.innerText = hrStr;
+
+                btn.onclick = () => {
+                    document.querySelectorAll('.btn-horario').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    horaSelecionada = hrStr;
+                    atualizarResumo();
+                };
+
+                if (cursor < 12 * 60) { gridManha.appendChild(btn); qtdManha++; }
+                else if (cursor < 18 * 60) { gridTarde.appendChild(btn); qtdTarde++; }
+                else { gridNoite.appendChild(btn); qtdNoite++; }
+
+                cursor += duracao;
+            }
+
+            if (qtdManha === 0) gridManha.innerHTML = '<div class="sem-horario">Nenhum horário livre</div>';
+            if (qtdTarde === 0) gridTarde.innerHTML = '<div class="sem-horario">Nenhum horário livre</div>';
+            if (qtdNoite === 0) gridNoite.innerHTML = '<div class="sem-horario">Nenhum horário livre</div>';
+        }
+
+        function atualizarResumo() {
+            const resumo = document.getElementById('resumoTexto');
+            const btn = document.getElementById('btnConfirmar');
+
+            if (servicoSelecionado && profissionalSelecionado && dataSelecionadaReal && horaSelecionada) {
+                const [ano, mes, dia] = dataSelecionadaReal.split('-');
+                resumo.innerHTML = `
+                    <span>${servicoSelecionado.nome} (${servicoSelecionado.duracao} min) • ${profissionalSelecionado}</span>
+                    <strong>${dia}/${mes} às ${horaSelecionada} (R$ ${servicoSelecionado.preco.toFixed(2).replace('.', ',')})</strong>
+                `;
+                btn.disabled = false;
+            } else {
+                resumo.innerHTML = `
+                    <span>Faltam dados para concluir</span>
+                    <strong>Complete os passos acima</strong>
+                `;
+                btn.disabled = true;
+            }
+        }
+
+        async function confirmarAgendamento() {
+            const btn = document.getElementById('btnConfirmar');
+            btn.innerText = "Agendando...";
+            btn.disabled = true;
+
+            const dados = {
+                profissional: profissionalSelecionado,
+                servico: servicoSelecionado.nome,
+                data: dataSelecionadaReal,
+                hora: horaSelecionada
+            };
+
+            try {
+                const res = await fetch('/agendar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('modalDetalhes').innerText = data.detalhes;
+                    document.getElementById('btnLinkWa').href = data.link_wa;
+                    document.getElementById('modalSucesso').style.display = 'flex';
+                } else {
+                    alert("❌ " + data.erro);
+                    btn.innerText = "Confirmar";
+                    atualizarAgenda();
+                }
+            } catch (e) {
+                alert("Erro de conexão com o servidor.");
+                btn.innerText = "Confirmar";
+                btn.disabled = false;
+            }
+        }
+
+        renderizarCalendario();
+        carregarServicos();
+        carregarBarbeiros();
+    </script>
+</body>
+
+</html>

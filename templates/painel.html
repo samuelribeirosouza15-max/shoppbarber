@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Barbeiro - {{ barbearia.nome if barbearia else 'ShoppBarber' }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #090a0f 0%, #161a25 100%);
+            color: #fff;
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #00bfff;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .btn-sair {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-sair:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 400;
+            color: #ccc;
+            white-space: nowrap;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #0088cc, #00bfff);
+            border-color: transparent;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        }
+
+        .conteudo {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 16px;
+        }
+
+        .filtros-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-filtro {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+        }
+
+        .btn-filtro.active {
+            background: rgba(0, 136, 204, 0.3);
+            border-color: #00bfff;
+            color: #00bfff;
+            font-weight: 600;
+        }
+
+        #buscaAgendamento {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            outline: none;
+            margin-bottom: 15px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .lista-agendamentos {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .lista-agendamentos li {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .lista-agendamentos li:last-child {
+            border-bottom: none;
+        }
+
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-grid input,
+        .form-grid select {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+        }
+
+        .form-grid select option {
+            background: #161a25;
+            color: white;
+        }
+
+        .form-grid input:focus,
+        .form-grid select:focus {
+            border-color: #00bfff;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5);
+        }
+
+        .lista-cadastrados {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .item-cadastrado {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-delete {
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .chat-mensagens {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .msg-bot {
+            background: rgba(0, 136, 204, 0.2);
+            border: 1px solid rgba(0, 136, 204, 0.3);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .msg-user {
+            background: rgba(255, 255, 255, 0.1);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-sugestoes {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            overflow-x: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .chip {
+            background: rgba(0, 136, 204, 0.15);
+            border: 1px solid rgba(0, 136, 204, 0.3);
+            color: #00bfff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+
+        .chip:hover {
+            background: rgba(0, 136, 204, 0.3);
+            color: white;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: white;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+        }
+
+        .chat-input-area button {
+            background: #0088cc;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 8px;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.3s ease-out;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .toast.sucesso {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .toast.erro {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .grafico-container {
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .btn-sair {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .tabs {
+                overflow-x: visible;
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .conteudo {
+                padding: 20px;
+            }
+
+            .lista-agendamentos li {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .form-grid {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .form-grid input,
+            .form-grid select {
+                width: auto;
+                flex: 1;
+                min-width: 150px;
+            }
+
+            .btn-add {
+                width: auto;
+            }
+
+            .item-cadastrado {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .btn-delete {
+                width: auto;
+            }
+
+            .chat-mensagens {
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .msg {
+                font-size: 14px;
+                max-width: 80%;
+                padding: 12px 16px;
+            }
+
+            #toast-container {
+                left: auto;
+                right: 20px;
+                align-items: flex-end;
+            }
+
+            .toast {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toast-container"></div>
+
+    <div class="header">
+        <div>
+            <h1 id="tituloPainel">Painel do Barbeiro</h1>
+            <span style="font-size: 12px; color: #888;">👑 {{ barbearia.nome if barbearia else 'King Barbearia'
+                }}</span>
+        </div>
+        <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="mudarAba('agendamentos', this)">📅 Agendamentos</div>
+        <div class="tab" onclick="mudarAba('servicos', this)">✂️ Serviços</div>
+        <div class="tab" onclick="mudarAba('barbeiros', this)">👨🏽‍🦱 Barbeiros</div>
+        <div class="tab" onclick="mudarAba('assistente', this)">🤖 Assistente</div>
+        <div class="tab" onclick="mudarAba('grafico', this)">📊 Faturamento</div>
+    </div>
+
+    <!-- ABA AGENDAMENTOS -->
+    <div id="aba-agendamentos" class="conteudo">
+        <div class="filtros-container">
+            <button class="btn-filtro active" onclick="filtrarAgendamentos('hoje', this)">Hoje</button>
+            <button class="btn-filtro" onclick="filtrarAgendamentos('amanha', this)">Amanhã</button>
+            <button class="btn-filtro" onclick="filtrarAgendamentos('todos', this)">Todos</button>
+        </div>
+        <input type="text" id="buscaAgendamento" placeholder="Buscar cliente..." onkeyup="buscarAgendamento()">
+        <ul class="lista-agendamentos" id="listaAgendamentos">
+            <li>Carregando...</li>
+        </ul>
+    </div>
+
+    <!-- ABA SERVIÇOS -->
+    <div id="aba-servicos" class="conteudo" style="display:none;">
+        <h3 style="margin-top:0; font-weight:600; font-size: 15px;">Adicionar Novo Serviço</h3>
+        <div class="form-grid">
+            <input type="text" id="novoServicoNome" placeholder="Nome (ex: Corte Degradê)">
+            <input type="number" id="novoServicoPreco" placeholder="Preço (ex: 45)">
+            <select id="novoServicoDuracao">
+                <option value="15">15 minutos</option>
+                <option value="25">25 minutos</option>
+                <option value="30" selected>30 minutos</option>
+                <option value="60">60 minutos</option>
+            </select>
+            <button class="btn-add" onclick="adicionarServico()">Adicionar</button>
+        </div>
+        <h3 style="font-weight:600; font-size: 15px;">Serviços Cadastrados</h3>
+        <div class="lista-cadastrados" id="listaServicos"></div>
+    </div>
+
+    <!-- ABA BARBEIROS -->
+    <div id="aba-barbeiros" class="conteudo" style="display:none;">
+        <h3 style="margin-top:0; font-weight:600; font-size: 15px;">Adicionar Novo Barbeiro</h3>
+        <div class="form-grid">
+            <input type="text" id="novoBarbeiroNome" placeholder="Nome do Barbeiro">
+            <input type="text" id="novoBarbeiroEspecialidade" placeholder="Especialidade (ex: Cabelo)">
+            <input type="file" id="novoBarbeiroFoto" accept="image/*"
+                style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; color: white;">
+            <button class="btn-add" onclick="adicionarBarbeiro()">Adicionar</button>
+        </div>
+        <h3 style="font-weight:600; font-size: 15px;">Barbeiros Cadastrados</h3>
+        <div class="lista-cadastrados" id="listaBarbeiros"></div>
+    </div>
+
+    <!-- ABA ASSISTENTE VIRTUAL -->
+    <div id="aba-assistente" class="conteudo" style="display:none;">
+        <h3 style="margin-top:0; font-weight:600; font-size: 15px;">🤖 Assistente Virtual</h3>
+
+        <div class="chat-container">
+            <div class="chat-mensagens" id="chatMensagens">
+                <div class="msg msg-bot">Olá, chefe! Sou seu assistente. Como posso ajudar?</div>
+            </div>
+
+            <div class="chat-sugestoes">
+                <div class="chip" onclick="enviarSugestao('Tem cliente hoje?')">📅 Clientes de Hoje</div>
+                <div class="chip" onclick="enviarSugestao('Qual o faturamento?')">💰 Faturamento</div>
+                <div class="chip" onclick="enviarSugestao('Qual o telefone do João?')">📞 Telefone do João</div>
+                <div class="chip" onclick="enviarSugestao('Qual o email da Maria?')">📧 Email da Maria</div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Digite sua pergunta..."
+                    onkeypress="if(event.key === 'Enter') enviarMensagem()">
+                <button onclick="enviarMensagem()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA GRÁFICO DE FATURAMENTO -->
+    <div id="aba-grafico" class="conteudo" style="display:none;">
+        <h3 style="margin-top:0; font-weight:600; font-size: 15px;">📊 Faturamento dos Últimos 7 Dias</h3>
+        <div class="grafico-container">
+            <canvas id="graficoFaturamento"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Atalho secreto de 5 cliques para abrir o Gestor ShoppBarber (Super-Admin)
+        let cliquesSecretos = 0;
+        let tempoReset = null;
+        document.getElementById('tituloPainel').addEventListener('click', () => {
+            cliquesSecretos++;
+            clearTimeout(tempoReset);
+            tempoReset = setTimeout(() => { cliquesSecretos = 0; }, 2000);
+            if (cliquesSecretos === 5) {
+                cliquesSecretos = 0;
+                window.location.href = '/super_admin';
+            }
+        });
+
+        function mostrarToast(mensagem, tipo = 'sucesso') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            toast.innerHTML = `${tipo === 'sucesso' ? '✅' : '❌'} ${mensagem}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function mudarAba(aba, elemento) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            elemento.classList.add('active');
+            document.querySelectorAll('.conteudo').forEach(c => c.style.display = 'none');
+            document.getElementById('aba-' + aba).style.display = 'block';
+
+            if (aba === 'grafico') carregarGrafico();
+        }
+
+        let agendamentosGlobais = [];
+        let filtroAtual = 'hoje';
+        let buscaAtual = '';
+
+        async function carregarAgendamentos() {
+            try {
+                const res = await fetch('/api/agendamentos_barbeiro');
+                if (!res.ok) return;
+                agendamentosGlobais = await res.json();
+                renderizarAgendamentos();
+            } catch (e) {
+                document.getElementById('listaAgendamentos').innerHTML = '<li style="color:#e74c3c;">Erro ao conectar.</li>';
+            }
+        }
+
+        function renderizarAgendamentos() {
+            const ul = document.getElementById('listaAgendamentos');
+            ul.innerHTML = '';
+
+            const hoje = new Date().toISOString().split('T')[0];
+            const amanha = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+            let filtrados = agendamentosGlobais.filter(a => {
+                if (filtroAtual === 'hoje') return a.data === hoje;
+                if (filtroAtual === 'amanha') return a.data === amanha;
+                return true;
+            });
+
+            if (buscaAtual) {
+                const termo = buscaAtual.toLowerCase();
+                filtrados = filtrados.filter(a =>
+                    a.cliente_nome.toLowerCase().includes(termo) ||
+                    (a.email && a.email.toLowerCase().includes(termo)) ||
+                    (a.telefone && a.telefone.includes(termo))
+                );
+            }
+
+            if (filtrados.length === 0) {
+                ul.innerHTML = '<li style="text-align:center; color:#888; padding: 20px;">Nenhum agendamento encontrado.</li>';
+                return;
+            }
+
+            filtrados.forEach(a => {
+                const fotoCliente = a.foto ? `<img src="${a.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px;">` : `<div style="width:40px; height:40px; border-radius:50%; background:#333; display:flex; align-items:center; justify-content:center; margin-right:10px;">👤</div>`;
+
+                let estrelas = '';
+                for (let i = 1; i <= 5; i++) {
+                    estrelas += `<span style="color: ${i <= (a.avaliacao || 0) ? '#f1c40f' : '#555'}; font-size:16px;">★</span>`;
+                }
+
+                ul.innerHTML += `
+                    <li style="display:flex; flex-direction:column; gap:10px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display:flex; align-items:center; width: 100%;">
+                            ${fotoCliente}
+                            <div style="flex:1;">
+                                <strong style="font-size:15px; color:#fff;">${a.cliente_nome}</strong><br>
+                                <span style="font-size:12px; color:#aaa;">${a.data} às ${a.hora} - ${a.servico}</span><br>
+                                <span style="font-size:11px; color:#0088cc;">📧 ${a.email || 'N/A'}</span><br>
+                                <span style="font-size:11px; color:#0088cc;">📱 ${a.telefone || 'N/A'}</span><br>
+                                <div style="margin-top:5px;">${estrelas}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span style="color:#0088cc; font-weight:600; font-size:12px;">${a.profissional}</span>
+                            <a href="https://wa.me/55${a.telefone ? a.telefone.replace(/\D/g, '') : ''}" target="_blank" style="background: rgba(37, 211, 102, 0.2); color:#25D366; padding:5px 10px; border-radius:5px; font-size:11px; text-decoration:none; font-weight:600;">Lembrar</a>
+                        </div>
+                    </li>`;
+            });
+        }
+
+        function filtrarAgendamentos(filtro, elemento) {
+            filtroAtual = filtro;
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+            elemento.classList.add('active');
+            renderizarAgendamentos();
+        }
+
+        function buscarAgendamento() {
+            buscaAtual = document.getElementById('buscaAgendamento').value;
+            renderizarAgendamentos();
+        }
+
+        async function carregarServicos() {
+            const res = await fetch('/api/servicos');
+            const servicos = await res.json();
+            const div = document.getElementById('listaServicos');
+            div.innerHTML = '';
+            servicos.forEach(s => {
+                div.innerHTML += `
+                    <div class="item-cadastrado">
+                        <span><strong>${s.nome}</strong> (R$ ${s.preco.toFixed(2)} | ${s.duracao} min)</span>
+                        <button class="btn-delete" style="background: rgba(231, 76, 60, 0.15); border: 1px solid #e74c3c; color: #e74c3c;" onclick="excluirServico(${s.id})">Excluir</button>
+                    </div>`;
+            });
+        }
+
+        async function adicionarServico() {
+            const nome = document.getElementById('novoServicoNome').value.trim();
+            const preco = parseFloat(document.getElementById('novoServicoPreco').value);
+            const duracao = parseInt(document.getElementById('novoServicoDuracao').value);
+
+            if (!nome || isNaN(preco)) {
+                mostrarToast("Preencha o nome e o preço corretamente!", "erro");
+                return;
+            }
+
+            await fetch('/api/servicos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, preco, duracao })
+            });
+            document.getElementById('novoServicoNome').value = '';
+            document.getElementById('novoServicoPreco').value = '';
+            mostrarToast("Serviço adicionado!");
+            carregarServicos();
+        }
+
+        async function excluirServico(id) {
+            if (!confirm("Deseja realmente excluir este serviço?")) return;
+            await fetch(`/api/servicos/${id}`, { method: 'DELETE' });
+            mostrarToast("Serviço excluído!");
+            carregarServicos();
+        }
+
+        async function carregarBarbeiros() {
+            const res = await fetch('/api/profissionais');
+            const barbeiros = await res.json();
+            const div = document.getElementById('listaBarbeiros');
+            div.innerHTML = '';
+
+            barbeiros.forEach(b => {
+                const isDisponivel = b.status === 'Disponivel';
+                const cor = isDisponivel ? '#2ecc71' : '#e74c3c';
+                const texto = isDisponivel ? 'Disponível' : 'Indisponível';
+                const novoStatus = isDisponivel ? 'Indisponivel' : 'Disponivel';
+                const acao = isDisponivel ? 'Pausar' : 'Ativar';
+                const imgSrc = b.foto ? b.foto : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+                div.innerHTML += `
+                    <div class="item-cadastrado">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <img src="${imgSrc}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                            <div>
+                                <strong>${b.nome}</strong> (${b.especialidade}) <br>
+                                <span style="color: ${cor}; font-size: 12px; font-weight: bold;">● ${texto}</span>
+                            </div>
+                        </div>
+                        <button class="btn-delete" style="background: rgba(255,255,255,0.05); border: 1px solid ${cor}; color: ${cor};" 
+                                onclick="mudarStatus(${b.id}, '${novoStatus}')">
+                            ${acao}
+                        </button>
+                    </div>`;
+            });
+        }
+
+        async function adicionarBarbeiro() {
+            const nome = document.getElementById('novoBarbeiroNome').value.trim();
+            const especialidade = document.getElementById('novoBarbeiroEspecialidade').value.trim();
+
+            if (!nome || !especialidade) {
+                mostrarToast("Preencha o nome e a especialidade!", "erro");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('nome', nome);
+            formData.append('especialidade', especialidade);
+
+            const fotoInput = document.getElementById('novoBarbeiroFoto');
+            if (fotoInput.files.length > 0) formData.append('foto', fotoInput.files[0]);
+
+            await fetch('/api/profissionais', { method: 'POST', body: formData });
+
+            document.getElementById('novoBarbeiroNome').value = '';
+            document.getElementById('novoBarbeiroEspecialidade').value = '';
+            document.getElementById('novoBarbeiroFoto').value = '';
+
+            mostrarToast("Barbeiro adicionado!");
+            carregarBarbeiros();
+        }
+
+        async function mudarStatus(id, status) {
+            await fetch(`/api/profissionais/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: status }) });
+            mostrarToast("Status atualizado!");
+            carregarBarbeiros();
+        }
+
+        async function enviarMensagem() {
+            const input = document.getElementById('chatInput');
+            const pergunta = input.value.trim();
+            if (!pergunta) return;
+            await processarPergunta(pergunta);
+            input.value = '';
+        }
+
+        async function enviarSugestao(texto) {
+            await processarPergunta(texto);
+        }
+
+        async function processarPergunta(pergunta) {
+            const chat = document.getElementById('chatMensagens');
+            chat.innerHTML += `<div class="msg msg-user">${pergunta}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch('/api/assistente', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pergunta: pergunta })
+                });
+                const data = await res.json();
+
+                chat.innerHTML += `<div class="msg msg-bot">${data.resposta.replace(/\n/g, '<br>')}</div>`;
+                chat.scrollTop = chat.scrollHeight;
+            } catch (e) {
+                chat.innerHTML += `<div class="msg msg-bot" style="color:#e74c3c;">Erro ao conectar.</div>`;
+            }
+        }
+
+        async function carregarGrafico() {
+            try {
+                const res = await fetch('/api/grafico');
+                const dados = await res.json();
+
+                const labels = dados.map(d => d.data);
+                const valores = dados.map(d => d.total);
+
+                const ctx = document.getElementById('graficoFaturamento').getContext('2d');
+                if (window.meuGrafico) window.meuGrafico.destroy();
+
+                window.meuGrafico = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Faturamento (R$)',
+                            data: valores,
+                            backgroundColor: 'rgba(0, 191, 255, 0.5)',
+                            borderColor: '#00bfff',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { labels: { color: '#fff' } } },
+                        scales: {
+                            y: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            x: { ticks: { color: '#aaa' }, grid: { display: false } }
+                        }
+                    }
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        carregarAgendamentos();
+        carregarServicos();
+        carregarBarbeiros();
+    </script>
+</body>
+
+</html>

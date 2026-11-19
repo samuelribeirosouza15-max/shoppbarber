@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor ShoppBarber | Super-Admin</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .login-box {
+            max-width: 380px;
+            margin: 80px auto;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            color: #38bdf8;
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+        }
+
+        .login-box p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            margin-bottom: 14px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #38bdf8;
+            color: #0f172a;
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+        }
+
+        .btn-verde {
+            background: #22c55e;
+            color: #052e16;
+        }
+
+        .btn-roxo {
+            background: #a855f7;
+            color: #fff;
+        }
+
+        .btn-vermelho {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .btn-amarelo {
+            background: #f59e0b;
+            color: #0f172a;
+        }
+
+        .btn-whats {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #1e293b;
+            padding: 20px 24px;
+            border-radius: 14px;
+            border: 1px solid #334155;
+            margin-bottom: 24px;
+        }
+
+        .topo h1 {
+            color: #38bdf8;
+            font-size: 1.4rem;
+        }
+
+        .tabela-wrap {
+            overflow-x: auto;
+            background: #1e293b;
+            border-radius: 14px;
+            border: 1px solid #334155;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 820px;
+        }
+
+        th,
+        td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #0f172a;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .ativo {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .bloqueado {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .vitalicio {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+        }
+
+        .aviso {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .acoes {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% if not autenticado %}
+    <div class="login-box">
+        <h1>👑 Gestor ShoppBarber</h1>
+        <p>Digite a senha mestra do administrador do SaaS</p>
+        <input type="password" id="senhaMestra" placeholder="Senha mestra"
+            onkeypress="if(event.key==='Enter') entrarSuperAdmin()">
+        <button class="btn btn-primary" onclick="entrarSuperAdmin()">Entrar no Painel</button>
+        <p id="erroLogin" style="color:#f87171; margin-top:12px;"></p>
+    </div>
+
+    <script>
+        async function entrarSuperAdmin() {
+            const senha = document.getElementById('senhaMestra').value;
+            const resp = await fetch('/api/super_admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ senha })
+            });
+            if (resp.ok) {
+                location.reload();
+            } else {
+                document.getElementById('erroLogin').innerText = 'Senha mestra incorreta!';
+            }
+        }
+    </script>
+    {% else %}
+    <div class="topo">
+        <div>
+            <h1>👑 Gestor ShoppBarber — Controle de Lojas</h1>
+            <p style="color:#94a3b8; font-size:0.85rem;">Gerencie assinaturas, renovações Pix (+30 dias) e bloqueios</p>
+        </div>
+        <div class="acoes">
+            <a href="/nova_barbearia" class="btn btn-amarelo">+ Nova Barbearia</a>
+            <a href="/painel" class="btn btn-verde">Voltar ao Painel</a>
+            <button class="btn btn-vermelho" onclick="sairSuperAdmin()">Sair</button>
+        </div>
+    </div>
+
+    <div class="tabela-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Barbearia</th>
+                    <th>Link</th>
+                    <th>WhatsApp Dono</th>
+                    <th>Plano / Validade</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="listaBarbearias">
+                <tr>
+                    <td colspan="7">Carregando barbearias...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function carregarBarbearias() {
+            const resp = await fetch('/api/super_admin/barbearias');
+            const lista = await resp.json();
+            const tbody = document.getElementById('listaBarbearias');
+            tbody.innerHTML = '';
+
+            lista.forEach(b => {
+                let validadeHtml = '';
+                if (b.plano === 'vitalicio') {
+                    validadeHtml = `<span class="badge vitalicio">♾️ Vitalício</span>`;
+                } else if (b.dias_restantes < 0) {
+                    validadeHtml = `<span class="badge bloqueado">Vencido há ${Math.abs(b.dias_restantes)}d</span>`;
+                } else if (b.dias_restantes <= 5) {
+                    validadeHtml = `<span class="badge aviso">Vence em ${b.dias_restantes}d (${b.data_vencimento})</span>`;
+                } else {
+                    validadeHtml = `<span class="badge ativo">Faltam ${b.dias_restantes} dias</span>`;
+                }
+
+                const statusHtml = b.status_pagamento === 'ativo'
+                    ? `<span class="badge ativo">Ativo</span>`
+                    : `<span class="badge bloqueado">Bloqueado</span>`;
+
+                const msgCobrar = encodeURIComponent(`Olá! Aqui é do suporte ShoppBarber. Passando para avisar sobre a assinatura da ${b.nome}. Deseja renovar por mais 30 dias via Pix?`);
+                const linkWhats = `https://wa.me/${b.whatsapp_dono}?text=${msgCobrar}`;
+
+                const btnBloqueio = b.status_pagamento === 'ativo'
+                    ? `<button class="btn btn-vermelho" onclick="mudarStatus(${b.id}, 'bloqueado')">Bloquear</button>`
+                    : `<button class="btn btn-verde" onclick="mudarStatus(${b.id}, 'ativo')">Liberar</button>`;
+
+                const btnExcluir = b.id !== 1
+                    ? `<button class="btn btn-vermelho" onclick="excluirLoja(${b.id}, '${b.nome}')">🗑️</button>`
+                    : '';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>#${b.id}</td>
+                        <td><strong>${b.nome}</strong></td>
+                        <td><a href="/${b.slug}" style="color:#38bdf8;">/${b.slug}</a></td>
+                        <td>
+                            ${b.whatsapp_dono || '-'}
+                            ${b.whatsapp_dono ? `<br><a href="${linkWhats}" target="_blank" class="btn btn-whats" style="margin-top:4px; padding:4px 8px; font-size:0.75rem;">Cobrar WhatsApp</a>` : ''}
+                        </td>
+                        <td>${validadeHtml}</td>
+                        <td>${statusHtml}</td>
+                        <td class="acoes">
+                            <button class="btn btn-verde" onclick="renovar30(${b.id})">+30 Dias</button>
+                            <button class="btn btn-roxo" onclick="tornarVitalicio(${b.id})">Vitalício</button>
+                            ${btnBloqueio}
+                            ${btnExcluir}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function renovar30(id) {
+            await fetch(`/api/super_admin/barbearias/${id}/renovar`, { method: 'POST' });
+            carregarBarbearias();
+        }
+
+        async function tornarVitalicio(id) {
+            await fetch(`/api/super_admin/barbearias/${id}/vitalicio`, { method: 'POST' });
+            carregarBarbearias();
+        }
+
+        async function mudarStatus(id, status) {
+            await fetch(`/api/super_admin/barbearias/${id}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            carregarBarbearias();
+        }
+
+        async function excluirLoja(id, nome) {
+            if (!confirm(`Tem certeza que deseja apagar a barbearia "${nome}" e todos os dados dela?`)) return;
+            await fetch(`/api/super_admin/barbearias/${id}`, { method: 'DELETE' });
+            carregarBarbearias();
+        }
+
+        async function sairSuperAdmin() {
+            await fetch('/api/super_admin/logout', { method: 'POST' });
+            location.href = '/painel';
+        }
+
+        carregarBarbearias();
+    </script>
+    {% endif %}
+</body>
+
+</html>
